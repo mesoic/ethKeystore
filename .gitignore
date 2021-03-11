@@ -1,0 +1,5 @@
+# Keystore files
+keystore/*.json
+
+# Node modules 
+node_modules/
