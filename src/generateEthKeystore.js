@@ -46,7 +46,9 @@ class generateEthKeystore {
 				Initialize private key. Note "Wallet.default" for ethereumjs-wallet@1.0.1^
 			*/
 			const privateKeyBuffer = EthUtil.toBuffer(_private);
+
 			const wallet = Wallet.default.fromPrivateKey(privateKeyBuffer);
+			
 			const address = wallet.getAddressString();
 
 			/*
@@ -177,11 +179,14 @@ class generateEthKeystore {
 				console.log( "OK: generating keystore")
 
 				if ( result.hdpath == "" ) {
+
 					console.log( "OK: hdpath default \"m/44\'/60\'/0\'/0/\" ")
+					
 					keystoreFromMnemonic ( result.private, result.passwd, result.index );
 				}
 
 				else {
+					
 					keystoreFromMnemonic ( result.private, result.passwd, result.index, result.hdpath );
 				}
 
