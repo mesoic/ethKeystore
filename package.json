@@ -17,6 +17,6 @@
     "ethjs-util": "^0.1.6",
     "fs": "^0.0.1-security",
     "fs.realpath": "^1.0.0",
-    "prompt": "^1.1.0",
+    "prompt": "^1.1.0"
   }
 }
