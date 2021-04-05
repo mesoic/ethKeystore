@@ -1,7 +1,7 @@
 {
   "name": "ethereumjs-keystore",
   "description": "Node.js scripts for generating V3 keystore files from private keys and bip39 mnemonic phrases using ethereumjs-wallet. ",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT",
   "author": "mesoic",
   "contributors": [
@@ -10,6 +10,7 @@
   "homepage": "",
   "repository": "https://github.com/mesoic/ethKeystore",
   "dependencies": {
+    "bip39": "^3.0.3",
     "clipboardy": "^2.3.0",
     "ethereum-cryptography": "^0.1.3",
     "ethereumjs-util": "^7.0.9",

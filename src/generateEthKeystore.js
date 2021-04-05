@@ -1,4 +1,10 @@
 /*
+	package: ethKeystore
+	license: MIT
+	author: mesoic@github
+*/
+
+/*
 	Ethereum (ethereumjs-wallet@1.0.1)
 */
 const Wallet = require('ethereumjs-wallet')
@@ -116,11 +122,11 @@ class generateEthKeystore {
 	}
 
 	/*
-		Generate keystore file from mnemonic phrase
+		Generate keystore files from mnemonic phrase
 	*/	
 	fromMnemonic() {
 
-		let keystoreFromMnemonic = async (_mnemonic, _passwd, _index = 0, _hdpath = "m/44'/60'/0'/0/") => {
+		let keystoreFromMnemonic = async ( _mnemonic, _passwd, _index = 0, _hdpath = "m/44'/60'/0'/0/") => {
 		
 			let hdwallet = Wallet.hdkey.fromMasterSeed(bip39.mnemonicToSeedSync(_mnemonic));
 
@@ -133,15 +139,41 @@ class generateEthKeystore {
 			/*
 				We need the async block because of this function
 			*/
-			const json = await wallet.toV3String(_passwd)
+			const keystore = await wallet.toV3String(_passwd)
+			
+			fs.writeFile(  this.path + address + ".json" , keystore, (err) => {
 		
-			fs.writeFile(  this.path + address + ".json" , json, (err) => {
 				if (err) {
 					throw err;
 				}
 				console.log( "OK: " + address )
 			})
 		}	
+
+		let hexstoreFromMnemonic = async ( _mnemonic, _passwd, _index = 0, _hdpath = "m/44'/60'/0'/0/") => {
+			
+			let hdwallet = Wallet.hdkey.fromMasterSeed(bip39.mnemonicToSeedSync(_mnemonic));
+
+			let hdpath = _hdpath;
+
+			let wallet = hdwallet.derivePath(_hdpath + _index).getWallet();
+
+			const address = wallet.getAddressString();
+
+			const hexstore = Buffer.from(JSON.stringify({
+
+				"secret" : wallet.getPrivateKeyString()
+			}));
+
+
+			fs.writeFile(  this.path + address + "-hex.json" , hexstore, (err) => {
+		
+				if (err) {
+					throw err;
+				}
+				console.log( "OK: " + address )
+			})
+		}
 
 		/*
 			Create a schema for user entry 
@@ -150,15 +182,45 @@ class generateEthKeystore {
 			
 			properties: {
 			
-				private : { description : 'PASTE your mnemonic', hidden : true, required: true },
+				output 	: { description : 'Select output format \n\t (1) v3-keystore \n\t (2) hexadecimal', required: true },
+
+				mnemonic : { description : 'PASTE your mnemonic', hidden : true, required: true },
 
 				index 	: { description : 'ENTER wallet index', hidden : false, required: true },
 
 				hdpath 	: { description : 'ENTER wallet hdpath', hidden : false, required : false },
+		
+				// only ask for password if we are building a v3-keystore
+				passwd 	: { 
 
-				passwd 	: { description: 'ENTER your password', hidden: true, required: true },
+					description : 'ENTER your password', 
 
-				verify 	: { description: 'RE-ENTER your password', hidden: true, required: true }
+					hidden: true, 
+
+					required: true,
+					
+					ask: function() {
+						
+						return prompt.history('output').value == "1";
+
+					}
+				},
+
+
+				verify 	: { 
+
+					description : 'RE-ENTER your password', 
+
+					hidden: true, 
+
+					required: true,
+					
+					// only ask for password if we are building a v3
+					ask: function() {
+						
+						return prompt.history('output').value == "1";
+					}
+				}
 			}
 		};
 
@@ -171,35 +233,57 @@ class generateEthKeystore {
 
 			if (err) { return onErr(err); }
 
-			/*
-				Check to see if password is correct
-			*/
-			if ( result.passwd == result.verify ){
 
-				console.log( "OK: generating keystore")
+			/*
+				v3 from mnemonic mode
+			*/
+			if ( result.output == "1") {
+
+				if ( result.passwd == result.verify ){
+
+					console.log( "OK: generating keystore")
+
+					if ( result.hdpath == "" ) {
+
+						console.log( "OK: hdpath default \"m/44\'/60\'/0\'/0/\" ")
+							
+						keystoreFromMnemonic ( result.mnemonic, result.passwd, result.index );
+					}
+
+					else {
+							
+						keystoreFromMnemonic ( result.mnemonic, result.passwd, result.index, result.hdpath );
+					}
+				}
+
+				else {
+
+					console.log( "ERROR: passwords do not match ... exiting.")
+				}
+			}
+
+			/*
+				hexadecimal from mnemonic mode
+			*/
+			if ( result.output == "2") {
 
 				if ( result.hdpath == "" ) {
 
 					console.log( "OK: hdpath default \"m/44\'/60\'/0\'/0/\" ")
 					
-					keystoreFromMnemonic ( result.private, result.passwd, result.index );
-				}
-
+					hexstoreFromMnemonic ( result.mnemonic, result.passwd, result.index );
+					}
+				
 				else {
-					
-					keystoreFromMnemonic ( result.private, result.passwd, result.index, result.hdpath );
+							
+					hexstoreFromMnemonic ( result.mnemonic, result.passwd, result.index, result.hdpath );
 				}
-
-				/*
-					Clear mnemonic from clipboard
-				*/
-				clipboardy.writeSync(" ");
-
 			}
 
-			else {
-				console.log( "ERROR: passwords do not match ... exiting.")
-			}
+			/*
+				Clear mnemonic from clipboard
+			*/
+			clipboardy.writeSync("");
 
 		});
 

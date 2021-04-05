@@ -1,4 +1,10 @@
 /*
+	package: ethKeystore
+	license: MIT
+	author: mesoic@github
+*/
+
+/*
 	Keystore class
 */
 const generateEthKeystore = require('./src/generateEthKeystore.js')
@@ -21,7 +27,7 @@ var schema = {
 	properties: {
 	
 		mode : {
-			description: 'Select input format \n\t (1) private key \n\t (2) mnemonic',
+			description: 'Select input format \n\t (1) mnemonic \n\t (2) hexadecimal',
 			required: true
 		}
 	}
@@ -37,20 +43,22 @@ prompt.get(schema, function (err, result) {
 	if (err) { return onErr(err); }
 
 	/*
+		Mnemonic
+	*/
+	if ( result.mode == "1" ){
+
+		console.log("\n")
+		keygen.fromMnemonic()
+	}
+
+	/*
 		Private key
 	*/ 
-	if ( result.mode == "1" ){
+	else if ( result.mode == "2" ){
 		console.log("\n")
 		keygen.fromPrivateKey()
 	}
 
-	/*
-		Mnemonic
-	*/
-	else if ( result.mode == "2" ){
-		console.log("\n")
-		keygen.fromMnemonic()
-	}
 
 	else {
 		console.log( "ERROR: Invalid mode")
