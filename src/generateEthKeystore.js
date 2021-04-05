@@ -188,7 +188,7 @@ class generateEthKeystore {
 
 				index 	: { description : 'ENTER wallet index', hidden : false, required: true },
 
-				hdpath 	: { description : 'ENTER wallet hdpath', hidden : false, required : false },
+				hdpath 	: { description : 'ENTER wallet hdpath \n\t default m/44\'/60\'/0\'/0/', hidden : false, required : false },
 		
 				// only ask for password if we are building a v3-keystore
 				passwd 	: { 
@@ -251,6 +251,8 @@ class generateEthKeystore {
 					}
 
 					else {
+
+						console.log( "OK: hdpath \"" + result.hdpath + "\"")
 							
 						keystoreFromMnemonic ( result.mnemonic, result.passwd, result.index, result.hdpath );
 					}
